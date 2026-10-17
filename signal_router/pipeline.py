@@ -96,7 +96,8 @@ class Pipeline:
             hubspot_company_id=company_id, hubspot_task_id=task_id,
             owner_email=d.owner_email, tier=d.tier, score=d.score, fingerprint=fp,
         )
-        if d.tier in ("A", "B") and (created or not prev):
+        # Alert when a lead first becomes worth a rep's time: new A/B, or upgraded from C.
+        if d.tier in ("A", "B") and (not prev or prev["tier"] not in ("A", "B")):
             self.slack.send(lead_alert(s, c, d))
         return Result(s.id, "created" if created else "updated", d.tier, d.owner_email, contact_id)
 

@@ -133,13 +133,20 @@ def test_does_not_retry_bad_request():
     assert len(api.calls) == 1
 
 
-def test_unknown_domain_falls_back_and_is_cached():
+def test_provider_answers_are_cached():
+    api, store, hs, pipe = make()
+    pipe.enricher.company_for("stripe.com")
+    pipe.enricher.company_for("stripe.com")
+    assert sum("hunter.io" in url for _, url in api.calls) == 1
+
+
+def test_fallback_is_not_cached_so_a_new_provider_gets_a_chance():
     api, store, hs, pipe = make()
     c1 = pipe.enricher.company_for("tinyshop.io", fallback_name="Tiny Shop")
-    c2 = pipe.enricher.company_for("tinyshop.io")
     assert c1.provider == "fallback" and c1.name == "Tiny Shop"
-    assert c2 == c1
-    assert sum("hunter.io" in url for _, url in api.calls) == 1
+    api.hunter["tinyshop.io"] = {"name": "Tiny Shop", "metrics": {"employees": "11-50"}}
+    c2 = pipe.enricher.company_for("tinyshop.io")
+    assert c2.provider == "hunter" and c2.employees == 11
 
 
 def test_reconcile_reports_deletes_and_manual_reassignments():
@@ -152,3 +159,23 @@ def test_reconcile_reports_deletes_and_manual_reassignments():
     assert rep.missing == ["sample.vp@stripe.com"]
     assert [e for e, _, _ in rep.owner_drift] == ["sample.salesops@hubspot.com"]
     assert "1 missing" in rep.summary()
+
+
+def test_discord_webhook_uses_content_payload():
+    from signal_router.slack import Notifier
+    api = FakeAPI()
+    n = Notifier("https://discord.com/api/webhooks/123/abc", api)
+    assert n.kind == "discord"
+    n.send("hello")
+    assert api.slack_messages == ["hello"]
+
+
+def test_upgrade_from_c_to_a_alerts_and_creates_task():
+    api, store, hs, pipe = make()
+    pipe.enricher.providers = []          # first run: no enrichment, lands in C
+    assert pipe.run([VP])[0].tier == "C"
+    assert api.slack_messages == [] and api.objects["tasks"] == {}
+    pipe.enricher.providers = [HunterProvider("k", api)]
+    res = pipe.run([VP])[0]
+    assert res.action == "updated" and res.tier == "A"
+    assert len(api.objects["tasks"]) == 1 and len(api.slack_messages) == 1

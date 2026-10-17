@@ -44,6 +44,9 @@ class FakeAPI:
         if u.netloc == "hooks.slack.com":
             self.slack_messages.append(body["text"])
             return FakeResponse(200, None)
+        if u.netloc == "discord.com":
+            self.slack_messages.append(body["content"])
+            return FakeResponse(204, None)
         if u.netloc == "api.hunter.io":
             domain = kw["params"]["domain"]
             if domain not in self.hunter:

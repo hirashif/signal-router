@@ -4,19 +4,36 @@ from .http import Transport, call
 from .models import Company, Decision, Signup
 
 
-class Slack:
-    """Posts to an incoming webhook. With no webhook configured it prints instead."""
+class Notifier:
+    """Posts alerts to a Slack or Discord incoming webhook.
+
+    The payload shape differs ({"text"} for Slack, {"content"} for Discord), so it's
+    picked from the URL. With no webhook configured it prints instead.
+    """
 
     def __init__(self, webhook_url: str | None, transport: Transport | None = None, out=print):
         self.url = webhook_url
         self.t = transport
         self.out = out
 
-    def send(self, text: str) -> None:
+    @property
+    def kind(self) -> str:
         if not self.url:
-            self.out(f"[slack dry-run] {text}")
+            return "none"
+        if "discord.com/api/webhooks" in self.url or "discordapp.com/api/webhooks" in self.url:
+            return "discord"
+        return "slack"
+
+    def send(self, text: str) -> None:
+        if self.kind == "none":
+            self.out(f"[alert dry-run] {text}")
             return
-        call(self.t, "POST", self.url, json={"text": text})
+        payload = {"content": text[:2000]} if self.kind == "discord" else {"text": text}
+        call(self.t, "POST", self.url, json=payload)
+
+
+# Kept so existing imports keep working.
+Slack = Notifier
 
 
 def lead_alert(s: Signup, c: Company, d: Decision) -> str:

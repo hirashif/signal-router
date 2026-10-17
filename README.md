@@ -8,7 +8,7 @@ signup CSV ─▶ enrich (cache ▸ Hunter ▸ People Data Labs ▸ fallback)
             ─▶ route: tier A ▸ AEs, tier B ▸ SDRs (round-robin), tier C ▸ nurture
             ─▶ HubSpot: upsert company (by domain) + contact (by email), associate,
                set owner + signal_score + signal_tier, create the owner's follow-up task
-            ─▶ Slack alert for A/B leads
+            ─▶ Slack or Discord alert for A/B leads
 nightly    ─▶ reconcile: what we synced vs. what HubSpot holds now
 ```
 
@@ -25,7 +25,7 @@ nightly    ─▶ reconcile: what we synced vs. what HubSpot holds now
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-cp .env.example .env              # HUBSPOT_TOKEN (HubSpot service key), optional HUNTER_API_KEY, PDL_API_KEY, SLACK_WEBHOOK_URL
+cp .env.example .env              # HUBSPOT_TOKEN (HubSpot service key), optional HUNTER_API_KEY, PDL_API_KEY, SLACK_WEBHOOK_URL or DISCORD_WEBHOOK_URL
 cp config.example.yaml config.yaml  # ICP weights, tiers, and owner emails (must be HubSpot users)
 
 .venv/bin/python -m signal_router run sample_data/signups.csv --dry-run   # no HubSpot writes

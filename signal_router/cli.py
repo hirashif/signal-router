@@ -34,7 +34,7 @@ def build(cfg: dict, db: str, need_hubspot: bool):
     if need_hubspot and not token:
         sys.exit("HUBSPOT_TOKEN is not set (put it in .env). Use --dry-run to try without HubSpot.")
     hs = HubSpot(token, t) if token else None
-    slack = Slack(os.getenv("SLACK_WEBHOOK_URL"), t)
+    slack = Slack(os.getenv("DISCORD_WEBHOOK_URL") or os.getenv("SLACK_WEBHOOK_URL"), t)
     return store, Enricher(providers, store), hs, slack
 
 

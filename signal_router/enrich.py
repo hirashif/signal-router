@@ -105,6 +105,7 @@ class Enricher:
 
     Personal email domains skip the paid providers entirely (no company to find),
     and a domain no provider knows still gets a minimal record so routing works.
+    Only real provider answers are cached; a fallback is retried next run.
     """
 
     def __init__(self, providers: list[Provider], store=None):
@@ -117,7 +118,7 @@ class Enricher:
             return Company(domain=domain, name=fallback_name, provider="personal", personal_email=True)
         if self.store:
             cached = self.store.cached_company(domain)
-            if cached:
+            if cached and cached.provider != "fallback":
                 return cached
         found = None
         for p in self.providers:
@@ -128,7 +129,8 @@ class Enricher:
             if found:
                 break
         if not found:
-            found = Company(domain=domain, name=fallback_name or domain.split(".")[0].title(), provider="fallback")
+            # Not cached: a provider added or recovering later should get another try.
+            return Company(domain=domain, name=fallback_name or domain.split(".")[0].title(), provider="fallback")
         if self.store:
             self.store.cache_company(found)
         return found

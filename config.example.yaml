@@ -1,0 +1,25 @@
+# Copy to config.yaml and edit. Owner emails must match HubSpot users
+# (Settings > Users & Teams) or the contact is created without an owner.
+
+icp:
+  personal_email_points: -20
+  employee_bands:
+    - {label: "too small", min: 1, max: 10, points: 0}
+    - {label: "core SMB", min: 11, max: 200, points: 30}
+    - {label: "mid-market", min: 201, max: 2000, points: 40}
+    - {label: "enterprise", min: 2001, points: 25}
+  target_industries: [software, financial, fintech, insurance, health]
+  industry_points: 20
+  title_rules:
+    - {label: "exec", pattern: "\\b(ceo|cto|coo|cfo|founder|chief|president|vp|vice president)\\b", points: 30}
+    - {label: "leader", pattern: "\\b(head|director|lead|manager)\\b", points: 20}
+    - {label: "ops/revops", pattern: "\\b(ops|operations|revops|sales)\\b", points: 10}
+  target_countries: [US, United States, CA, Canada]
+  country_points: 10
+
+routing:
+  tier_a_min: 70
+  tier_b_min: 40
+  queues:
+    ae: [ae-one@example.com, ae-two@example.com]
+    sdr: [sdr-one@example.com]

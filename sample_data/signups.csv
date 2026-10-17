@@ -1,0 +1,6 @@
+id,email,first_name,last_name,title,company,source
+s-001,sample.vp@stripe.com,Maria,Chen,VP Revenue Operations,Stripe,pricing-page
+s-002,sample.student@gmail.com,Dev,Patel,Student,,free-trial
+s-003,sample.salesops@hubspot.com,Jordan,Lee,Sales Operations Manager,HubSpot,webinar
+s-004,sample.engineer@ramp.com,Alex,Kim,Software Engineer,Ramp,docs
+s-005,sample.founder@tinyshop.io,Sam,Rivera,Founder,Tiny Shop,free-trial

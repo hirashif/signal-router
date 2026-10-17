@@ -25,17 +25,17 @@ nightly    ─▶ reconcile: what we synced vs. what HubSpot holds now
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-cp .env.example .env              # HUBSPOT_TOKEN (private app), optional HUNTER_API_KEY, PDL_API_KEY, SLACK_WEBHOOK_URL
+cp .env.example .env              # HUBSPOT_TOKEN (HubSpot service key), optional HUNTER_API_KEY, PDL_API_KEY, SLACK_WEBHOOK_URL
 cp config.example.yaml config.yaml  # ICP weights, tiers, and owner emails (must be HubSpot users)
 
-.venv/bin/signal-router run sample_data/signups.csv --dry-run   # no HubSpot writes
-.venv/bin/signal-router setup                                    # creates signal_score / signal_tier properties
-.venv/bin/signal-router run sample_data/signups.csv
-.venv/bin/signal-router reconcile
+.venv/bin/python -m signal_router run sample_data/signups.csv --dry-run   # no HubSpot writes
+.venv/bin/python -m signal_router setup                                    # creates signal_score / signal_tier properties
+.venv/bin/python -m signal_router run sample_data/signups.csv
+.venv/bin/python -m signal_router reconcile
 .venv/bin/pytest -q
 ```
 
-HubSpot private app scopes: contacts, companies and owners (read/write), plus contact schemas (to create the two custom properties).
+HubSpot service key (Development > Keys) scopes: contacts, companies and owners (read/write), plus contact schemas (to create the two custom properties).
 
 ## Tests
 
